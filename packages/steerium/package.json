@@ -1,0 +1,76 @@
+{
+  "name": "steerium",
+  "version": "1.0.0",
+  "description": "Local-first, code-defined workflow runner for deterministic code, AI calls, and coding agents.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Ryan Fitzgerald <me@ryanfitzgerald.ca>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanFitzgerald/steerium.git"
+  },
+  "homepage": "https://github.com/RyanFitzgerald/steerium#readme",
+  "bugs": {
+    "url": "https://github.com/RyanFitzgerald/steerium/issues"
+  },
+  "keywords": [
+    "workflow",
+    "automation",
+    "ai",
+    "agents",
+    "cron",
+    "triggers",
+    "local-first",
+    "anthropic",
+    "openai",
+    "claude",
+    "codex",
+    "linear",
+    "jira",
+    "github"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "bin": {
+    "steerium": "dist/cli/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepublishOnly": "npm run clean && npm run build && npm run build:ui && npm test",
+    "build": "tsc -p tsconfig.json",
+    "postbuild": "chmod +x dist/cli/index.js",
+    "build:ui": "npm --prefix ../../ui run build && rm -rf dist/ui && cp -R ../../ui/dist dist/ui",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx test/*.test.ts",
+    "steerium": "node --import tsx src/cli/index.ts",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**' --test-coverage-exclude='src/runtime/ui.ts' --test-coverage-lines=90 --test-coverage-branches=80 --test-coverage-functions=80 --import tsx test/*.test.ts"
+  },
+  "dependencies": {
+    "croner": "^9.0.0",
+    "jiti": "^2.4.2"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@openai/codex-sdk": "^0.45.0",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.0"
+  }
+}

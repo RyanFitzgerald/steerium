@@ -1,0 +1,53 @@
+# steerium
+
+> steerium is an open-source, local-first TypeScript workflow orchestrator for deterministic code, AI calls, and coding agents. It runs workflows on the user's machine, records every run in SQLite, and supports explicit replay.
+
+steerium 0.6.0 requires Node.js 22.13 or newer and is distributed under the MIT license. Workflows are ordinary TypeScript files loaded at runtime; there is no YAML, DSL, build step, or hosted service between the workflow and the machine running it.
+
+Agent bootstrap:
+
+- Install with `npm install -g steerium`.
+- Run `steerium init` to scaffold `~/.steerium/`, then `steerium workflow run hello`, `steerium logs`, and `steerium start`.
+- Use the deterministic, offline `mock` provider first so the complete workflow loop can be verified without credentials or model calls.
+- Put personal or cross-repository workflows in `~/.steerium/workflows/`. Put repository-specific workflows in `<repo>/.steerium/workflows/`; these run with the repository root as `cwd` and can be committed with the code.
+- A workflow default-exports `defineWorkflow({ name, on, async run(ctx) {} })`. Wrap recorded operations with `ctx.step()`, call models or coding agents with `ctx.agent.run()`, and save outputs with `ctx.artifact`.
+- Built-in triggers include manual runs, cron and intervals, GitHub, Linear, Jira, webhooks, and approval replies. Built-in providers include `mock`, `openai`, `anthropic`, `codex`, and `claude`.
+- The `codex` and `claude` providers can reuse an installed, logged-in local CLI. Agent providers are read-only unless editing permissions are explicitly configured. Run `steerium doctor` to verify provider authentication and connector configuration.
+- Workflows run with the user's OS privileges. Treat project registration and executable workflow files as a trust boundary.
+- Runs are not retried automatically because workflows may create external side effects. Use `steerium replay <runId>` for an explicit rerun against the stored event.
+- Runs have an append-only typed event timeline, precise lifecycle outcomes, and provenance (workflow/config hashes, runtime, and Git identity). Replay uses current code against the stored event.
+- `outputSchema` supports JSON Schema and structural Standard Schema inputs on OpenAI, Anthropic, Codex, and Claude; parsed output is returned in `AgentResult<T>.data`.
+- Approval reask rounds use unique request IDs, so delayed or stale replies cannot answer a newer request. The browser UI supports options, display content, and free-form replies.
+
+## Start here
+
+- [Getting started](https://steerium.dev/getting-started/): Install steerium, verify it with the mock provider, connect a local coding agent, and create a first workflow.
+- [Writing workflows](https://steerium.dev/guides/workflows/): Workflow definitions, context APIs, steps, state, artifacts, concurrency, timeouts, and cancellation.
+- [Triggers](https://steerium.dev/guides/triggers/): Manual, schedule, GitHub, Linear, Jira, webhook, and custom trigger behavior.
+- [Providers](https://steerium.dev/guides/providers/): API models, local coding-agent providers, authentication resolution, permissions, and usage.
+- [Configuration](https://steerium.dev/reference/configuration/): Complete `defineConfig` reference for providers, connectors, projects, runtime, webhooks, and approvals.
+
+## Build and operate
+
+- [Projects and scopes](https://steerium.dev/guides/projects/): Global and per-repository workflows, config merging, daemon modes, and working directories.
+- [Approvals](https://steerium.dev/guides/approvals/): Durable human-in-the-loop gates that survive restarts without blocking a process.
+- [Advanced workflows](https://steerium.dev/extending/advanced-workflows/): Multi-stage agent workflows, structured output, chaining, and performance tuning.
+- [CLI reference](https://steerium.dev/reference/cli/): Every steerium command and option.
+- [Control API](https://steerium.dev/reference/control-api/): Local daemon HTTP endpoints for workflows, runs, events, artifacts, approvals, cancellation, and replay.
+
+## Extend steerium
+
+- [Custom triggers](https://steerium.dev/extending/custom-triggers/): Implement the public Trigger interface and persistent dedup state.
+- [Custom providers](https://steerium.dev/extending/custom-providers/): Implement and register a model or coding-agent provider.
+- [Custom connectors](https://steerium.dev/extending/custom-connectors/): Package triggers and actions for an external system.
+
+## Source and examples
+
+- [GitHub repository](https://github.com/RyanFitzgerald/steerium): Source code, issues, and contribution history.
+- [Project README](https://github.com/RyanFitzgerald/steerium/blob/main/README.md): Comprehensive architecture, usage, security, and development documentation.
+- [Example workflows](https://github.com/RyanFitzgerald/steerium/tree/main/packages/steerium/examples): Complete workflows for PR review, ticket implementation, scheduled content, approvals, and deterministic repository housekeeping.
+- [npm package](https://www.npmjs.com/package/steerium): Published package metadata and installation.
+
+## Optional
+
+- [Browser UI](https://steerium.dev/guides/browser-ui/): Local dashboard, live runs, logs, artifacts, cancellation, and replay.

@@ -1,0 +1,615 @@
+---
+title: steerium
+description:
+  steerium is an open-source, local-first TypeScript workflow orchestrator for
+  deterministic code, AI calls, and coding agents, with typed, inspectable,
+  replayable runs.
+head:
+  - tag: title
+    content: steerium — Local-first TypeScript workflows for code and AI agents
+  - tag: meta
+    attrs:
+      property: og:title
+      content:
+        steerium — Local-first TypeScript workflows for code and AI agents
+  - tag: meta
+    attrs:
+      property: og:type
+      content: website
+  - tag: meta
+    attrs:
+      name: twitter:title
+      content:
+        steerium — Local-first TypeScript workflows for code and AI agents
+  - tag: meta
+    attrs:
+      name: twitter:description
+      content:
+        Open-source, local-first TypeScript workflow orchestration for
+        deterministic code, AI calls, and coding agents.
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: >-
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"steerium","description":"Open-source,
+      local-first TypeScript workflow orchestration for deterministic code, AI
+      calls, and coding
+      agents.","url":"https://steerium.dev/","applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform","softwareVersion":"0.6.0","license":"https://opensource.org/license/mit","codeRepository":"https://github.com/RyanFitzgerald/steerium","programmingLanguage":"TypeScript","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+template: splash
+tableOfContents: false
+editUrl: false
+lastUpdated: false
+---
+
+import InstallCommand from "../../components/InstallCommand.astro";
+
+<div class="landing">
+
+<section class="lp-hero">
+  <div class="lp-hero-copy">
+    <p class="lp-badge"><span class="lp-badge-dot"></span> v0.6.0 · open source (MIT) · runs on your machine</p>
+
+    <h1 class="lp-title"><span>Write the workflow.</span><em>Not the runner.</em></h1>
+
+    <p class="lp-sub">steerium gives you the primitives — triggers, steps, providers — and a local daemon that keeps them live, records a typed event timeline and execution provenance for every run, and can replay it. What goes inside the function is entirely yours: deterministic code, a coding agent, or both in the same run.</p>
+
+    <div class="lp-actions">
+      <a class="lp-btn lp-btn-primary" href="/getting-started/">Get started <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+      <a class="lp-btn lp-btn-ghost" href="https://github.com/RyanFitzgerald/steerium"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.34.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 2.87-.39c.97 0 1.95.13 2.87.39 2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14 0 1.54-.01 2.79-.01 3.17 0 .31.21.67.8.55C20.22 21.38 23.5 17.08 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z" /></svg> GitHub</a>
+    </div>
+
+    <InstallCommand />
+
+    <p class="lp-hero-note">Needs Node 22.13+</p>
+
+  </div>
+
+  <div class="lp-hero-file">
+    <div class="lp-filebar">
+      <span class="lp-filepath">.steerium/workflows/<b>review.ts</b></span>
+      <span class="lp-filetag">project workflow</span>
+    </div>
+
+```ts frame="none"
+import { defineWorkflow, github } from "steerium";
+
+export default defineWorkflow({
+  name: "review",
+  on: github.prOpened({ repo: "acme/app" }),
+  async run(ctx) {
+    const { pr } = ctx.event;
+
+    const review = await ctx.step("review", () =>
+      ctx.agent.run({
+        provider: "claude", // the CLI you already log into
+        allowedTools: ["Read", "Grep", "Bash"],
+        prompt: `Review PR #${pr.number} against ${pr.baseBranch}.
+                 Correctness bugs only — skip style nits.`,
+      }),
+    );
+
+    const { token } = ctx.connector<{ token: string }>("github");
+    await github.comment(token, pr.repo, pr.number, review.text);
+  },
+});
+```
+
+    <div class="lp-filefoot">
+      <span><i class="lp-dot-ok"></i> typed timeline</span>
+      <span>·</span>
+      <span>provenance captured</span>
+      <span>·</span>
+      <span>inspectable and replayable</span>
+    </div>
+
+  </div>
+</section>
+
+<section class="lp-section" id="ideas">
+  <div class="lp-head">
+    <p class="lp-eyebrow"><span>01</span> Ideas</p>
+    <h2 class="lp-h2">Nine ideas, to show the shape</h2>
+    <p class="lp-lede">None of these are features — they're just workflows, each a single file someone wrote in <code>.steerium/workflows/</code>. Some call an agent, some are only git and a schedule. Yours will be different, and that's the point.</p>
+  </div>
+
+  <div class="lp-ideas">
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">github.prOpened()</p>
+      <h3>Review every PR as it opens</h3>
+      <p>An agent reads the diff inside the real checkout — not a pasted patch — and posts a review comment.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">linear.ticketMoved()</p>
+      <h3>Turn a ticket into a branch</h3>
+      <p>Plan with a cheap API call, then let a coding agent take a first pass and push it for you to judge.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">{'schedule.cron("0 16 * * 5")'}</p>
+      <h3>Write Friday's changelog</h3>
+      <p>Read the week's commits, draft release notes, and save them as an artifact you can actually diff.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">schedule.every(6h)</p>
+      <h3>Prune merged branches</h3>
+      <p>No AI anywhere in this one. It's <code>{"git fetch --prune"}</code> and a loop — automation doesn't have to mean agent.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">github.issueOpened()</p>
+      <h3>Triage new issues</h3>
+      <p>Ask for schema-checked structured output, then route on typed fields like label, priority, and missing repro steps.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">approvals.responded()</p>
+      <h3>Draft it, but ask me first</h3>
+      <p>The agent drafts and stops. Choose a structured action or leave feedback; stale replies cannot answer a newer round.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">{'schedule.cron("0 9 * * 1")'}</p>
+      <h3>Bump deps, but only if green</h3>
+      <p>Update, run the suite, open a PR when it passes and a note to yourself when it doesn't.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">github.prOpened()</p>
+      <h3>Keep the docs honest</h3>
+      <p>When a PR touches the public API, have an agent check whether the docs still describe reality.</p>
+    </div>
+    <div class="lp-idea">
+      <p class="lp-idea-trigger">{'schedule.cron("0 8 * * *")'}</p>
+      <h3>Yesterday, summarized</h3>
+      <p>Commits landed, tickets closed, and PRs still waiting on you — as a digest before you open your laptop.</p>
+    </div>
+
+    <div class="lp-idea lp-idea-more">
+      <p class="lp-idea-trigger">defineTrigger() · defineProvider() · defineConnector()</p>
+      <h3>…and whatever yours actually is</h3>
+      <p>If the trigger you need isn't in the box, write it — a queue, a file watcher, an internal webhook, a device on your network. Same for providers and connectors: the built-ins are written against the public API you get, so there's nothing to fork and nothing to wait for.</p>
+      <a class="lp-link" href="/extending/custom-triggers/">See how the built-ins are built <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+    </div>
+
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-head">
+    <p class="lp-eyebrow"><span>02</span> The code</p>
+    <h2 class="lp-h2">Four real workflows, start to finish</h2>
+    <p class="lp-lede">No DSL, no YAML, no visual builder. These are copy-pasteable files from the <a href="https://github.com/RyanFitzgerald/steerium/tree/main/packages/steerium/examples">examples directory</a>. For typed agent results, see the <a href="/extending/advanced-workflows/#structured-output">structured-output guide</a> and <a href="https://github.com/RyanFitzgerald/steerium/blob/main/packages/steerium/examples/structured-triage.ts"><code>structured-triage.ts</code></a>.</p>
+  </div>
+
+  <div class="lp-gallery">
+    <input class="lp-radio" type="radio" name="lp-wf" id="lp-wf-1" checked />
+    <input class="lp-radio" type="radio" name="lp-wf" id="lp-wf-2" />
+    <input class="lp-radio" type="radio" name="lp-wf" id="lp-wf-3" />
+    <input class="lp-radio" type="radio" name="lp-wf" id="lp-wf-4" />
+
+    <div class="lp-tabs">
+      <label for="lp-wf-1"><b>PR review</b><span>github.prOpened</span></label>
+      <label for="lp-wf-2"><b>Ticket → agent</b><span>linear.ticketMoved</span></label>
+      <label for="lp-wf-3"><b>Housekeeping</b><span>schedule.every</span></label>
+      <label for="lp-wf-4"><b>Approval gate</b><span>approvals.responded</span></label>
+    </div>
+
+    <div class="lp-panes">
+      <div class="lp-pane">
+        <p class="lp-pane-note">A pull request opens. The agent reviews the diff from inside the checkout and comments back. Read-only tools — it can look, not touch.</p>
+
+```ts title="acme-app/.steerium/workflows/pr-review.ts"
+import { defineWorkflow, github } from "steerium";
+
+export default defineWorkflow({
+  name: "pr-review",
+  on: github.prOpened({ repo: "acme/app", intervalMs: 60_000 }),
+  timeoutMs: 15 * 60_000,
+  async run(ctx) {
+    const { pr } = ctx.event;
+
+    await ctx.step("fetch", () => exec("git", ["fetch", "origin", pr.branch]));
+
+    const review = await ctx.step("review", () =>
+      ctx.agent.run({
+        provider: "claude",
+        allowedTools: ["Read", "Grep", "Bash"],
+        prompt: `Review PR #${pr.number} ("${pr.title}") on ${pr.branch}.
+                 Diff against ${pr.baseBranch}. Correctness bugs and risky
+                 changes only — skip style nits.`,
+      }),
+    );
+
+    const { token } = ctx.connector<{ token: string }>("github");
+    await ctx.step("comment", () =>
+      github.comment(token, pr.repo, pr.number, review.text),
+    );
+
+    await ctx.artifact.writeText("review.md", review.text);
+  },
+});
+```
+
+      </div>
+
+      <div class="lp-pane">
+        <p class="lp-pane-note">A ticket moves to Todo. A cheap model plans, a coding agent implements on a branch, and the ticket gets told what happened. <code>concurrency: 1</code> keeps one agent in the repo at a time — the rest queue.</p>
+
+```ts title="acme-app/.steerium/workflows/ticket-agent.ts"
+import { defineWorkflow, linear } from "steerium";
+
+export default defineWorkflow({
+  name: "ticket-agent",
+  on: linear.ticketMoved({ to: "Todo", intervalMs: 60_000 }),
+  concurrency: 1, // one agent in the repo at a time
+  timeoutMs: 45 * 60_000,
+  async run(ctx) {
+    const { ticket } = ctx.event;
+    const branch = `steerium/${ticket.identifier.toLowerCase()}`;
+
+    const plan = await ctx.step("plan", () =>
+      ctx.agent.run({
+        provider: "openai", // cheap model for the thinking
+        prompt: `Draft an implementation plan for ${ticket.identifier}:
+                 ${ticket.title}\n\n${ticket.description}`,
+      }),
+    );
+
+    await ctx.step("branch", () => exec("git", ["checkout", "-B", branch]));
+
+    await ctx.step("implement", () =>
+      ctx.agent.run({
+        provider: "codex", // real coding agent, chosen per call
+        prompt: `Implement this plan, then run the tests:\n\n${plan.text}`,
+      }),
+    );
+
+    const { apiKey } = ctx.connector<{ apiKey: string }>("linear");
+    await linear.comment(apiKey, ticket.id, `Pushed to \`${branch}\`.`);
+  },
+});
+```
+
+      </div>
+
+      <div class="lp-pane">
+        <p class="lp-pane-note">Not everything needs a model. This one is plain Node and git on a six-hour interval — but it still gets the run history, the logs, and the replay.</p>
+
+```ts title="~/.steerium/workflows/repo-housekeeping.ts"
+import { defineWorkflow, schedule } from "steerium";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const exec = promisify(execFile);
+
+export default defineWorkflow({
+  name: "repo-housekeeping",
+  on: schedule.every(6 * 60 * 60_000),
+  async run(ctx) {
+    const pruned = await ctx.step("prune-merged-branches", async () => {
+      await exec("git", ["fetch", "--prune"], { cwd: ctx.scope.cwd });
+      const { stdout } = await exec("git", ["branch", "--merged", "main"], {
+        cwd: ctx.scope.cwd,
+      });
+      const branches = stdout
+        .split("\n")
+        .map((b) => b.trim())
+        .filter((b) => b && !b.startsWith("*") && b !== "main");
+
+      for (const b of branches) {
+        await exec("git", ["branch", "-d", b], { cwd: ctx.scope.cwd });
+      }
+      return branches;
+    });
+
+    await ctx.artifact.writeJSON("pruned.json", pruned);
+    ctx.logger.info(`pruned ${pruned.length} merged branch(es)`);
+  },
+});
+```
+
+      </div>
+
+      <div class="lp-pane">
+        <p class="lp-pane-note">Waiting for a human isn't a paused process. <code>approvals.request</code> posts the question and the run <em>ends</em>. Your reply is a new event that fires a second workflow — so waiting survives restarts, sleep, and reboots.</p>
+
+```ts title="~/.steerium/workflows/blog-approve.ts"
+import { defineWorkflow, approvals, isApprove } from "steerium";
+
+export default defineWorkflow({
+  name: "blog-approve",
+  on: approvals.responded(),
+  async run(ctx) {
+    const { approval, reply } = ctx.event;
+    const { draft } = approval.payload;
+
+    if (isApprove(reply.text)) {
+      await ctx.step("publish", () => commitAndPush(draft));
+      await approvals.resolve(ctx, approval.id);
+      return;
+    }
+
+    // Anything that isn't approval is treated as feedback: revise and re-ask.
+    const revised = await ctx.step("revise", () =>
+      ctx.agent.run({
+        provider: "anthropic",
+        prompt: `Revise this draft.\n\nFeedback: ${reply.text}\n\n${draft}`,
+      }),
+    );
+
+    await approvals.reask(ctx, {
+      id: approval.id,
+      text: "Review the revised draft.",
+      payload: { ...approval.payload, draft: revised.text },
+      options: [{ value: "approve", label: "Approve and publish" }],
+      display: {
+        kind: "markdown",
+        title: "Revised draft",
+        content: revised.text,
+      },
+      allowFreeform: true,
+    });
+  },
+});
+```
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-head">
+    <p class="lp-eyebrow"><span>03</span> Mix</p>
+    <h2 class="lp-h2">Deterministic and agentic, in one function</h2>
+    <p class="lp-lede">There is no "AI workflow" mode. <code>ctx.step()</code> wraps a shell command and a coding agent exactly the same way, so a workflow can be plain code, entirely agent-driven, or move between the two as many times as it needs.</p>
+  </div>
+
+  <div class="lp-mix">
+    <div class="lp-mix-copy">
+      <p class="lp-mix-point"><b>Start deterministic.</b> Most automations begin as git, fs, and an npm package. Nothing about steerium asks you to add a model.</p>
+      <p class="lp-mix-point"><b>Reach for an agent at the step that needs judgement.</b> Summarizing, drafting, deciding, writing code — a call, not a rewrite.</p>
+      <p class="lp-mix-point"><b>Both land in the same typed timeline.</b> Step status, logs, artifacts, agent provenance, and the final outcome remain inspectable whichever kind of step produced them.</p>
+    </div>
+
+    <div class="lp-mix-panel">
+      <div class="lp-mix-head">
+        <span class="lp-mix-file">release-notes.ts</span>
+        <span class="lp-mix-on">{'schedule.cron("0 16 * * 5")'}</span>
+      </div>
+      <ol class="lp-mix-steps">
+        <li class="is-code">
+          <span class="lp-mix-tag">code</span>
+          <span class="lp-mix-name">collect</span>
+          <span class="lp-mix-detail">{"git log --since=1.week --oneline"}</span>
+        </li>
+        <li class="is-agent">
+          <span class="lp-mix-tag">agent</span>
+          <span class="lp-mix-name">draft</span>
+          <span class="lp-mix-detail">anthropic · group 42 commits into notes</span>
+        </li>
+        <li class="is-code">
+          <span class="lp-mix-tag">code</span>
+          <span class="lp-mix-name">write</span>
+          <span class="lp-mix-detail">prepend CHANGELOG.md, commit</span>
+        </li>
+        <li class="is-agent">
+          <span class="lp-mix-tag">agent</span>
+          <span class="lp-mix-name">open-pr</span>
+          <span class="lp-mix-detail">claude · push the branch, summarize it</span>
+        </li>
+      </ol>
+      <p class="lp-mix-foot">one workflow · one run record · one replay</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-head">
+    <p class="lp-eyebrow"><span>04</span> Scope</p>
+    <h2 class="lp-h2">Global or in the repo. Same runner.</h2>
+    <p class="lp-lede">Some automation belongs to you, some belongs to a codebase. steerium runs both from one daemon, with one API and one run history — the only difference is where the file lives and what <code>cwd</code> it runs with.</p>
+  </div>
+
+<div class="lp-scopes">
+  <div class="lp-scope">
+    <p class="lp-scope-kind">Global</p>
+    <p class="lp-scope-path">~/.steerium/workflows/</p>
+    <ul>
+      <li>
+        runs with <code>cwd = ~/.steerium</code>
+      </li>
+      <li>automation that isn't about one repo</li>
+      <li>digests, drafting, cross-repo chores</li>
+      <li>
+        travels with <code>steerium config export</code>
+      </li>
+    </ul>
+  </div>
+  <div class="lp-scope">
+    <p class="lp-scope-kind">Project</p>
+    <p class="lp-scope-path">{"<repo>/.steerium/workflows/"}</p>
+    <ul>
+      <li>
+        runs with <code>cwd = the repo root</code>
+      </li>
+      <li>committed alongside the code it automates</li>
+      <li>
+        arrives with <code>git clone</code>, reviewed in PRs
+      </li>
+      <li>what makes agent workflows natural</li>
+    </ul>
+  </div>
+</div>
+
+<div class="lp-join" aria-hidden="true">
+  <i></i>
+  <i></i>
+</div>
+
+  <div class="lp-runner">
+    <p class="lp-runner-title">one steerium daemon</p>
+    <div class="lp-runner-tags">
+      <span>the same <code>defineWorkflow</code></span>
+      <span>one SQLite run history</span>
+      <span>one CLI</span>
+      <span>one control API</span>
+      <span>one browser UI</span>
+    </div>
+    <p class="lp-runner-note">Project config merges over global, and project wins. Run <code>steerium start</code> inside a repo that has a <code>.steerium/</code> and the daemon scopes itself to that project automatically — no registration, works in a fresh clone.</p>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-head">
+    <p class="lp-eyebrow"><span>05</span> Model</p>
+    <h2 class="lp-h2">Three primitives — and you can replace all of them</h2>
+    <p class="lp-lede">The built-ins hold no privileged access. Every one of them is written against the same public API you get, so anything shipped is a worked example rather than a wall.</p>
+  </div>
+
+<div class="lp-model">
+  <div class="lp-prim">
+    <span class="lp-prim-n">Trigger</span>
+    <p class="lp-prim-d">Emits events.</p>
+    <ul>
+      <li>cron &amp; intervals</li>
+      <li>GitHub, Linear, Jira</li>
+      <li>webhooks (HMAC-verified)</li>
+      <li>approval replies</li>
+      <li>manual fires</li>
+    </ul>
+    <p class="lp-prim-ext">
+      <code>defineTrigger</code> — implement <code>start(ctx, emit)</code> and
+      you get persistent state for dedup cursors and webhook registration for
+      free.
+    </p>
+  </div>
+  <div class="lp-prim">
+    <span class="lp-prim-n">Workflow</span>
+    <p class="lp-prim-d">Handles one event.</p>
+    <ul>
+      <li>an async function</li>
+      <li>typed events and outcomes</li>
+      <li>steps, logs, artifacts</li>
+      <li>any npm package</li>
+      <li>shell, git, fs</li>
+    </ul>
+    <p class="lp-prim-ext">
+      <code>defineWorkflow</code> — there is nothing to extend here, because
+      there was never a DSL in the way.
+    </p>
+  </div>
+  <div class="lp-prim">
+    <span class="lp-prim-n">Provider</span>
+    <p class="lp-prim-d">Runs an AI or agent call.</p>
+    <ul>
+      <li>
+        <code>openai</code>, <code>anthropic</code>
+      </li>
+      <li>
+        <code>claude</code>, <code>codex</code>
+      </li>
+      <li>
+        <code>mock</code> (the default)
+      </li>
+      <li>typed structured output</li>
+      <li>chosen per call</li>
+    </ul>
+    <p class="lp-prim-ext">
+      <code>defineProvider</code> — a local model, an internal inference
+      service, a different agent. Register it in config; workflows just name it.
+    </p>
+  </div>
+</div>
+
+<ol class="lp-loop">
+  <li>
+    <span>1</span> an event arrives
+  </li>
+  <li>
+    <span>2</span> deduped and persisted
+  </li>
+  <li>
+    <span>3</span> your function runs, step by step
+  </li>
+  <li>
+    <span>4</span> it ends <code>succeeded</code>, <code>failed</code>,{" "}
+    <code>cancelled</code>, or <code>timed_out</code>
+  </li>
+  <li>
+    <span>5</span> replay the same event, with both runs' provenance recorded
+  </li>
+</ol>
+
+<p class="lp-footnote">
+  No automatic retries, deliberately: agents commit code, push branches, and
+  leave comments, so a blind retry duplicates all of it.{" "}
+  <code>steerium replay &lt;runId&gt;</code> is the explicit re-run. Replay
+  keeps the original event, but uses the code and provider configuration loaded
+  now; compare the two provenance records when exact reproducibility matters.
+</p>
+
+  <div class="lp-agentic">
+    <p class="lp-agentic-lead">And you don't have to write any of it by hand.</p>
+    <p class="lp-agentic-body">A workflow is a plain TypeScript file with a typed API and no DSL to learn, which makes it the kind of thing a coding agent is genuinely good at producing. Point Claude Code or Codex at your repo, describe the automation in a sentence, and let it write the file, fire it once against the <code>mock</code> provider, and read the run record to check its own work.</p>
+    <div class="lp-agentic-links">
+      <a class="lp-link" href="/extending/custom-triggers/">Build a custom trigger <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+      <a class="lp-link" href="/extending/custom-providers/">Build a provider <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+      <a class="lp-link" href="/extending/custom-connectors/">Build a connector <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-split">
+    <div class="lp-split-copy">
+      <p class="lp-eyebrow"><span>06</span> Start</p>
+      <h2 class="lp-h2">Running in four commands</h2>
+      <p class="lp-lede">The default provider is <code>mock</code> — deterministic, offline, no key. You can watch the whole loop work before pointing it at a real model.</p>
+      <p class="lp-lede">Once the daemon is up, <code>127.0.0.1:4319</code> serves a small browser UI: live typed timelines, per-step logs, artifacts, provenance, explicit outcomes, cancel and replay, plus an approval inbox with structured actions.</p>
+      <p class="lp-lede">Follow the <a href="/guides/browser-ui/">browser UI guide</a>, or build a durable human-in-the-loop flow with the <a href="/guides/approvals/">approvals guide</a>.</p>
+      <a class="lp-link" href="/getting-started/">Read the getting started guide <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></a>
+    </div>
+
+    <div class="lp-split-code">
+
+```bash frame="none"
+$ steerium init                 # scaffold ~/.steerium
+$ steerium workflow run hello   # fire one workflow, right now
+$ steerium logs                 # every run is on the record
+$ steerium start                # daemon: triggers, API, browser UI
+```
+
+    </div>
+
+  </div>
+</section>
+
+<section class="lp-cta">
+  <h2>Build something that runs itself.</h2>
+  <p>
+    Install it, scaffold a workflow, and have something of your own running in
+    the next five minutes.
+  </p>
+  <div class="lp-actions">
+    <a class="lp-btn lp-btn-primary" href="/getting-started/">
+      Get started{" "}
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </svg>
+    </a>
+    <a class="lp-btn lp-btn-ghost" href="/guides/workflows/">
+      Browse the guides
+    </a>
+  </div>
+</section>
+
+</div>

@@ -1,0 +1,1392 @@
+/* steerium landing page.
+   Schematic, mono-forward, near-black. Everything is scoped under .landing so
+   the documentation pages are untouched. */
+
+/* ------------------------------------------------------------------ */
+/* Page chrome: hide the auto title, let the landing own the canvas    */
+/* ------------------------------------------------------------------ */
+
+main:has(.landing) h1[id="_top"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The theme renders the frontmatter description right after the title */
+main:has(.landing) h1[id="_top"] + p {
+  display: none;
+}
+
+main:has(.landing) .markdown-wrapper {
+  padding-top: 0;
+}
+
+/* Landing palette. Declared on :root so the full-bleed page background can
+   use it too, not just elements inside .landing. */
+:root {
+  --lp-bg: oklch(0.145 0.005 265);
+  --lp-panel: oklch(0.178 0.006 265);
+  --lp-panel-2: oklch(0.205 0.007 265);
+  --lp-line: oklch(1 0 0 / 0.09);
+  --lp-line-strong: oklch(1 0 0 / 0.16);
+  --lp-text: oklch(0.965 0.002 265);
+  --lp-dim: oklch(0.7 0.012 265);
+  --lp-faint: oklch(0.56 0.012 265);
+  --lp-accent: oklch(0.68 0.16 259);
+  --lp-accent-soft: oklch(0.68 0.16 259 / 0.12);
+  --lp-ok: oklch(0.76 0.15 158);
+}
+
+main:has(.landing) {
+  overflow-x: clip;
+  background: var(--lp-bg);
+}
+
+/* Neutralize Starlight's prose flow spacing inside the landing. The landing
+   components own their rhythm, while Starlight adds block margins to elements
+   such as paragraphs and lists. :where() keeps specificity low so the
+   component rules below can still set intentional margins. */
+.sl-markdown-content .landing :where(*) {
+  margin-block: 0;
+}
+
+/* MDX wraps multiline content in links and list items with a paragraph. Keep
+   that authoring-friendly markup from becoming an extra layout box inside the
+   landing's flex and grid components. */
+.sl-markdown-content .landing :is(a, li) > p {
+  display: contents;
+}
+
+/* Landing chrome that uses the mono face without being a <code> element —
+   same literal-characters reasoning as the rule in custom.css. */
+.landing :where(
+    .lp-badge, .lp-install, .lp-idea-trigger, .lp-scope-path, .lp-filebar,
+    .lp-filefoot, .lp-marquee, .lp-tabs span, .lp-mix-head, .lp-mix-name,
+    .lp-mix-detail, .lp-mix-tag, .lp-mix-foot, .lp-runner-title, .lp-eyebrow
+  ) {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+.landing {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 0 1.75rem 6rem;
+  font-family: var(--sl-font);
+  color: var(--lp-text);
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared primitives                                                   */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin-bottom: 1.1rem;
+}
+
+/* The index reads as a plate number with a rule running off it, not a boxed
+   chip — lighter, and it sits on the same baseline as the label. */
+.landing .lp-eyebrow span {
+  display: inline-flex;
+  align-items: center;
+  color: var(--lp-accent);
+  letter-spacing: 0.02em;
+}
+
+.landing .lp-eyebrow span::after {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  margin-left: 0.7rem;
+  background: var(--lp-line-strong);
+}
+
+.landing .lp-h2 {
+  font-size: clamp(1.7rem, 3.2vw, 2.35rem);
+  font-weight: 600;
+  letter-spacing: -0.032em;
+  line-height: 1.1;
+  color: var(--lp-text);
+  margin-bottom: 0.9rem;
+}
+
+.landing .lp-lede {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--lp-dim);
+  max-width: 44rem;
+}
+
+.landing .lp-lede + .lp-lede {
+  margin-top: 0.85rem;
+}
+
+.landing :where(
+    .lp-lede, .lp-idea, .lp-pane-note, .lp-prim, .lp-loop,
+    .lp-scope li, .lp-runner, .lp-footnote, .lp-agentic
+  ) code {
+  font-family: var(--sl-font-mono);
+  font-size: 0.85em;
+  color: var(--lp-text);
+  background: var(--lp-panel-2);
+  border: 1px solid var(--lp-line);
+  border-radius: 0.25rem;
+  padding: 0.08em 0.32em;
+  /* Keep chips whole — a break inside one reads as two chips */
+  white-space: nowrap;
+}
+
+.landing .lp-section {
+  padding-top: 7rem;
+}
+
+.landing .lp-head {
+  max-width: 46rem;
+  margin-bottom: 2.75rem;
+}
+
+/* Buttons ---------------------------------------------------------- */
+
+.landing .lp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.landing .lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  padding: 0.68rem 1.15rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.landing .lp-btn-primary {
+  background: var(--lp-text);
+  color: var(--lp-bg);
+  border: 1px solid var(--lp-text);
+}
+
+.landing .lp-btn-primary:hover {
+  background: oklch(1 0 0);
+  border-color: oklch(1 0 0);
+}
+
+.landing .lp-btn-ghost {
+  background: transparent;
+  color: var(--lp-text);
+  border: 1px solid var(--lp-line-strong);
+}
+
+.landing .lp-btn-ghost:hover {
+  background: var(--lp-panel);
+  border-color: var(--lp-dim);
+}
+
+.landing .lp-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  margin-top: 1.6rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.8125rem;
+  color: var(--lp-accent);
+  text-decoration: none;
+  transition: gap 0.15s ease;
+}
+
+.landing .lp-link:hover {
+  gap: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  align-items: center;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  padding: 5.5rem 0 4.5rem;
+}
+
+/* Hairline grid backdrop, full-bleed, fading out downward */
+.landing .lp-hero::before {
+  content: "";
+  position: absolute;
+  inset: -6rem calc(50% - 50vw) 0;
+  z-index: -2;
+  background:
+    linear-gradient(to right, oklch(1 0 0 / 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.028) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 92%);
+  pointer-events: none;
+}
+
+/* A single restrained wash of accent, upper-left */
+.landing .lp-hero::after {
+  content: "";
+  position: absolute;
+  inset: -8rem calc(50% - 50vw) 0;
+  z-index: -3;
+  background: radial-gradient(
+    ellipse 45% 55% at 22% 12%,
+    oklch(0.55 0.19 262 / 0.16),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.landing .lp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--lp-dim);
+  border: 1px solid var(--lp-line);
+  border-radius: 999px;
+  padding: 0.32rem 0.85rem;
+  margin-bottom: 1.85rem;
+  background: var(--lp-panel);
+}
+
+.landing .lp-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--lp-ok);
+  box-shadow: 0 0 7px var(--lp-ok);
+}
+
+/* One clause per line — the break is deliberate, so no text-wrap: balance. */
+.landing .lp-title {
+  font-size: clamp(2.35rem, 4.1vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.06;
+  color: var(--lp-text);
+  margin-bottom: 1.4rem;
+}
+
+.landing .lp-title span,
+.landing .lp-title em {
+  display: block;
+  font-style: normal;
+}
+
+.landing .lp-title em {
+  color: var(--lp-accent);
+}
+
+.landing .lp-sub {
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  color: var(--lp-dim);
+  max-width: 34rem;
+  margin-bottom: 2rem;
+}
+
+.landing .lp-install {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.45rem 0.5rem 0.45rem 0.95rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.5rem;
+  background: var(--lp-panel);
+  font-family: var(--sl-font-mono);
+  font-size: 0.85rem;
+}
+
+.landing .lp-copy {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin-left: 0.2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--lp-faint);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.landing .lp-copy:hover {
+  color: var(--lp-text);
+  border-color: var(--lp-line);
+  background: var(--lp-panel-2);
+}
+
+.landing .lp-copy:focus-visible {
+  outline: 2px solid var(--lp-accent);
+  outline-offset: 1px;
+}
+
+/* Both icons share one grid cell and cross-fade */
+.landing .lp-copy svg {
+  grid-area: 1 / 1;
+  transition: opacity 0.15s ease;
+}
+
+.landing .lp-copy-done,
+.landing .lp-copy.is-copied .lp-copy-idle {
+  opacity: 0;
+}
+
+.landing .lp-copy.is-copied .lp-copy-done {
+  opacity: 1;
+  color: var(--lp-ok);
+}
+
+.landing .lp-copy.is-copied {
+  color: var(--lp-ok);
+  border-color: color-mix(in oklab, var(--lp-ok) 30%, transparent);
+  background: color-mix(in oklab, var(--lp-ok) 10%, transparent);
+}
+
+.landing .lp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.landing .lp-install code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lp-text);
+}
+
+.landing .lp-prompt {
+  color: var(--lp-accent);
+}
+
+.landing .lp-hero-note {
+  max-width: 27rem;
+  margin-top: 1.1rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--lp-faint);
+}
+
+/* The file — the hero's product shot is the actual source ----------- */
+
+.landing .lp-hero-file {
+  min-width: 0;
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 0.75rem;
+  background: var(--lp-panel);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px oklch(0 0 0 / 0.3),
+    0 30px 60px -30px oklch(0 0 0 / 0.9);
+}
+
+.landing .lp-filebar,
+.landing .lp-filefoot {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.7rem;
+  color: var(--lp-faint);
+}
+
+.landing .lp-filebar {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--lp-line);
+  background: var(--lp-panel-2);
+}
+
+.landing .lp-filepath {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing .lp-filepath b {
+  font-weight: 500;
+  color: var(--lp-text);
+}
+
+.landing .lp-filetag {
+  flex: none;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.25rem;
+  color: var(--lp-accent);
+  white-space: nowrap;
+}
+
+.landing .lp-filefoot {
+  border-top: 1px solid var(--lp-line);
+  background: var(--lp-panel-2);
+  flex-wrap: wrap;
+}
+
+.landing .lp-filefoot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.landing .lp-dot-ok {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--lp-ok);
+}
+
+/* Expressive Code sitting inside our own frames --------------------- */
+
+.landing .lp-hero-file .expressive-code,
+.landing .lp-split-code .expressive-code {
+  margin: 0;
+}
+
+.landing .lp-hero-file pre,
+.landing .lp-split-code pre {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding-block: 1rem;
+}
+
+.landing .lp-hero-file .frame,
+.landing .lp-split-code .frame {
+  box-shadow: none !important;
+}
+
+.landing .lp-hero-file code,
+.landing .lp-split-code code {
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+/* ------------------------------------------------------------------ */
+/* Marquee strip                                                       */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-marquee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.5rem;
+  padding: 1.15rem 1.35rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.6rem;
+  background: var(--lp-panel);
+  font-family: var(--sl-font-mono);
+  font-size: 0.75rem;
+  color: var(--lp-dim);
+}
+
+.landing .lp-marquee span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.landing .lp-marquee span::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--lp-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Ideas grid                                                          */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-ideas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--lp-line);
+  border: 1px solid var(--lp-line);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.landing .lp-idea {
+  padding: 1.5rem 1.4rem 1.6rem;
+  background: var(--lp-bg);
+  transition: background-color 0.15s ease;
+}
+
+.landing .lp-idea:hover {
+  background: var(--lp-panel);
+}
+
+.landing .lp-idea-trigger {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 0.95rem;
+  padding: 0.22rem 0.5rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.3rem;
+  background: var(--lp-panel-2);
+  font-family: var(--sl-font-mono);
+  font-size: 0.7rem;
+  color: var(--lp-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landing .lp-idea h3 {
+  font-size: 0.975rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--lp-text);
+  margin-bottom: 0.45rem;
+}
+
+.landing .lp-idea p:not(.lp-idea-trigger) {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--lp-dim);
+}
+
+/* The closing tile spans the grid: the nine above are examples, this is the
+   invitation to write your own. */
+.landing .lp-idea-more {
+  grid-column: 1 / -1;
+  background: linear-gradient(
+    100deg,
+    var(--lp-accent-soft),
+    transparent 55%
+  );
+}
+
+.landing .lp-idea-more:hover {
+  background:
+    linear-gradient(100deg, var(--lp-accent-soft), transparent 55%),
+    var(--lp-panel);
+}
+
+.landing .lp-idea-more .lp-idea-trigger {
+  color: var(--lp-accent);
+  white-space: normal;
+}
+
+.landing .lp-idea-more h3 {
+  font-size: 1.05rem;
+}
+
+.landing .lp-idea-more p:not(.lp-idea-trigger) {
+  max-width: 52rem;
+}
+
+.landing .lp-idea-more .lp-link {
+  margin-top: 1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Workflow gallery (CSS-only tabs)                                    */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-gallery {
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 0.75rem;
+  background: var(--lp-panel);
+  overflow: hidden;
+}
+
+.landing .lp-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.landing .lp-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--lp-line);
+  background: var(--lp-panel-2);
+}
+
+.landing .lp-tabs label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.95rem 1.1rem;
+  border-right: 1px solid var(--lp-line);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.landing .lp-tabs label:last-child {
+  border-right: 0;
+}
+
+.landing .lp-tabs label:hover {
+  background: var(--lp-panel);
+}
+
+.landing .lp-tabs b {
+  font-size: 0.85rem;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+  color: var(--lp-dim);
+  transition: color 0.15s ease;
+}
+
+.landing .lp-tabs span {
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+  color: var(--lp-faint);
+}
+
+.landing .lp-panes > .lp-pane {
+  display: none;
+}
+
+.landing .lp-pane-note {
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid var(--lp-line);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--lp-dim);
+}
+
+.landing .lp-pane-note em {
+  font-style: normal;
+  color: var(--lp-text);
+}
+
+.landing .lp-pane .expressive-code {
+  margin: 0;
+}
+
+.landing .lp-pane pre {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding-block: 1.25rem;
+}
+
+/* Match the code gutter to the note above it */
+.landing .lp-pane pre > code {
+  padding-inline: 1.35rem;
+}
+
+.landing .lp-pane .frame .header {
+  padding-inline: 0.6rem;
+}
+
+.landing .lp-pane .frame {
+  box-shadow: none !important;
+}
+
+.landing .lp-pane code {
+  font-size: 0.8rem;
+}
+
+/* Wire each radio to its tab and its pane */
+.landing #lp-wf-1:checked ~ .lp-tabs label[for="lp-wf-1"],
+.landing #lp-wf-2:checked ~ .lp-tabs label[for="lp-wf-2"],
+.landing #lp-wf-3:checked ~ .lp-tabs label[for="lp-wf-3"],
+.landing #lp-wf-4:checked ~ .lp-tabs label[for="lp-wf-4"] {
+  background: var(--lp-bg);
+  border-bottom-color: var(--lp-accent);
+}
+
+.landing #lp-wf-1:checked ~ .lp-tabs label[for="lp-wf-1"] b,
+.landing #lp-wf-2:checked ~ .lp-tabs label[for="lp-wf-2"] b,
+.landing #lp-wf-3:checked ~ .lp-tabs label[for="lp-wf-3"] b,
+.landing #lp-wf-4:checked ~ .lp-tabs label[for="lp-wf-4"] b {
+  color: var(--lp-text);
+}
+
+.landing #lp-wf-1:checked ~ .lp-panes > .lp-pane:nth-child(1),
+.landing #lp-wf-2:checked ~ .lp-panes > .lp-pane:nth-child(2),
+.landing #lp-wf-3:checked ~ .lp-panes > .lp-pane:nth-child(3),
+.landing #lp-wf-4:checked ~ .lp-panes > .lp-pane:nth-child(4) {
+  display: block;
+}
+
+/* Keyboard focus lands on the invisible radio — surface it on the tab */
+.landing .lp-radio:focus-visible ~ .lp-tabs label[for] {
+  outline-offset: -2px;
+}
+
+.landing #lp-wf-1:focus-visible ~ .lp-tabs label[for="lp-wf-1"],
+.landing #lp-wf-2:focus-visible ~ .lp-tabs label[for="lp-wf-2"],
+.landing #lp-wf-3:focus-visible ~ .lp-tabs label[for="lp-wf-3"],
+.landing #lp-wf-4:focus-visible ~ .lp-tabs label[for="lp-wf-4"] {
+  outline: 2px solid var(--lp-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Model: primitives + loop                                            */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-model {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--lp-line);
+  border: 1px solid var(--lp-line);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.landing .lp-prim {
+  padding: 1.6rem 1.5rem;
+  background: var(--lp-bg);
+}
+
+.landing .lp-prim-n {
+  display: block;
+  font-family: var(--sl-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lp-accent);
+  margin-bottom: 0.7rem;
+}
+
+.landing .lp-prim-d {
+  font-size: 1rem;
+  font-weight: 550;
+  letter-spacing: -0.015em;
+  color: var(--lp-text);
+  margin-bottom: 1.1rem;
+}
+
+.landing .lp-prim ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+/* Inline flow, not flex: a flex container splits text and <code> into separate
+   flex items, which breaks wrapping and detaches punctuation from its chip. */
+.landing .lp-prim li {
+  position: relative;
+  padding-left: 1.35rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--lp-dim);
+}
+
+.landing .lp-prim li::before {
+  content: "";
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 10px;
+  height: 1px;
+  background: var(--lp-line-strong);
+}
+
+.landing .lp-loop {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.5rem;
+  padding: 0;
+  margin-top: 1.5rem;
+}
+
+.landing .lp-loop li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.4rem;
+  background: var(--lp-panel);
+  font-size: 0.8125rem;
+  color: var(--lp-dim);
+}
+
+.landing .lp-loop li span {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.25rem;
+  background: var(--lp-accent-soft);
+  color: var(--lp-accent);
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+}
+
+.landing .lp-loop li:not(:last-child)::after {
+  content: "→";
+  margin-left: 0.35rem;
+  color: var(--lp-faint);
+}
+
+/* ------------------------------------------------------------------ */
+/* Mix: deterministic and agentic steps side by side                   */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-mix {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: center;
+}
+
+.landing .lp-mix-point {
+  padding-left: 1rem;
+  border-left: 2px solid var(--lp-line-strong);
+  font-size: 0.925rem;
+  line-height: 1.65;
+  color: var(--lp-dim);
+}
+
+.landing .lp-mix-point + .lp-mix-point {
+  margin-top: 1.5rem;
+}
+
+.landing .lp-mix-point b {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: var(--lp-text);
+}
+
+.landing .lp-mix-panel {
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 0.75rem;
+  background: var(--lp-panel);
+  overflow: hidden;
+}
+
+.landing .lp-mix-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 1.1rem;
+  border-bottom: 1px solid var(--lp-line);
+  background: var(--lp-panel-2);
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+}
+
+.landing .lp-mix-file {
+  color: var(--lp-text);
+}
+
+.landing .lp-mix-on {
+  color: var(--lp-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landing .lp-mix-steps {
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.landing .lp-mix-steps li {
+  display: grid;
+  grid-template-columns: 3.6rem 6rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.5rem;
+  background: var(--lp-bg);
+}
+
+.landing .lp-mix-tag {
+  display: grid;
+  place-items: center;
+  padding: 0.18rem 0;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.3rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+}
+
+.landing .is-code .lp-mix-tag {
+  color: var(--lp-dim);
+  background: var(--lp-panel-2);
+}
+
+.landing .is-agent .lp-mix-tag {
+  color: var(--lp-accent);
+  border-color: color-mix(in oklab, var(--lp-accent) 35%, transparent);
+  background: var(--lp-accent-soft);
+}
+
+.landing .lp-mix-name {
+  font-family: var(--sl-font-mono);
+  font-size: 0.78rem;
+  color: var(--lp-text);
+}
+
+.landing .lp-mix-detail {
+  min-width: 0;
+  font-family: var(--sl-font-mono);
+  font-size: 0.7rem;
+  color: var(--lp-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing .lp-mix-foot {
+  padding: 0.75rem 1.1rem;
+  border-top: 1px solid var(--lp-line);
+  background: var(--lp-panel-2);
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+  color: var(--lp-faint);
+}
+
+/* ------------------------------------------------------------------ */
+/* Scope: two homes converging on one runner                           */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-scopes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.landing .lp-scope {
+  padding: 1.5rem 1.5rem 1.6rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.75rem;
+  background: var(--lp-panel);
+}
+
+.landing .lp-scope-kind {
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lp-accent);
+  margin-bottom: 0.6rem;
+}
+
+.landing .lp-scope-path {
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 1.15rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.35rem;
+  background: var(--lp-bg);
+  font-family: var(--sl-font-mono);
+  font-size: 0.8rem;
+  color: var(--lp-text);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.landing .lp-scope ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.landing .lp-scope li {
+  position: relative;
+  padding-left: 1.35rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--lp-dim);
+}
+
+.landing .lp-scope li::before {
+  content: "";
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 10px;
+  height: 1px;
+  background: var(--lp-line-strong);
+}
+
+/* Two elbows meeting a centre drop — a circuit trace, not a swoosh. */
+.landing .lp-join {
+  position: relative;
+  height: 3.25rem;
+}
+
+.landing .lp-join i {
+  position: absolute;
+  top: 0;
+  height: 50%;
+  border-bottom: 1px solid var(--lp-line-strong);
+}
+
+.landing .lp-join i:first-child {
+  left: 25%;
+  right: 50%;
+  border-left: 1px solid var(--lp-line-strong);
+  border-bottom-left-radius: 0.55rem;
+}
+
+.landing .lp-join i:last-child {
+  left: 50%;
+  right: 25%;
+  border-right: 1px solid var(--lp-line-strong);
+  border-bottom-right-radius: 0.55rem;
+}
+
+.landing .lp-join::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--lp-line-strong);
+}
+
+.landing .lp-runner {
+  padding: 1.75rem 1.6rem;
+  border: 1px solid color-mix(in oklab, var(--lp-accent) 24%, var(--lp-line));
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(ellipse 60% 140% at 50% 0%, var(--lp-accent-soft), transparent 70%),
+    var(--lp-panel);
+  text-align: center;
+}
+
+.landing .lp-runner-title {
+  font-family: var(--sl-font-mono);
+  font-size: 0.95rem;
+  color: var(--lp-text);
+  margin-bottom: 1rem;
+}
+
+.landing .lp-runner-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.landing .lp-runner-tags span {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--lp-line);
+  border-radius: 0.35rem;
+  background: var(--lp-bg);
+  font-size: 0.78rem;
+  color: var(--lp-dim);
+}
+
+.landing .lp-runner-note {
+  max-width: 46rem;
+  margin: 0 auto;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--lp-faint);
+}
+
+/* ------------------------------------------------------------------ */
+/* Extension points + agent-authored workflows                         */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-prim-ext {
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--lp-line);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--lp-faint);
+}
+
+.landing .lp-footnote {
+  max-width: 46rem;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--lp-faint);
+}
+
+.landing .lp-agentic {
+  position: relative;
+  overflow: hidden;
+  margin-top: 2.5rem;
+  padding: 2rem 1.9rem;
+  border: 1px solid color-mix(in oklab, var(--lp-accent) 24%, var(--lp-line));
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(ellipse 50% 120% at 8% 0%, var(--lp-accent-soft), transparent 68%),
+    var(--lp-panel);
+}
+
+.landing .lp-agentic-lead {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--lp-text);
+  margin-bottom: 0.7rem;
+}
+
+.landing .lp-agentic-body {
+  max-width: 48rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--lp-dim);
+}
+
+.landing .lp-agentic-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  margin-top: 1.5rem;
+}
+
+.landing .lp-agentic-links .lp-link {
+  margin-top: 0;
+}
+
+
+
+/* ------------------------------------------------------------------ */
+/* Quick start split                                                   */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.landing .lp-split-code {
+  min-width: 0;
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 0.75rem;
+  background: var(--lp-panel);
+  overflow: hidden;
+}
+
+.landing .lp-split-code pre {
+  padding-block: 1.35rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Final CTA                                                           */
+/* ------------------------------------------------------------------ */
+
+.landing .lp-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: 7rem;
+  padding: 4.5rem 2rem;
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 1rem;
+  text-align: center;
+  background: var(--lp-panel);
+}
+
+.landing .lp-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to right, oklch(1 0 0 / 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.03) 1px, transparent 1px),
+    radial-gradient(ellipse 55% 90% at 50% 0%, oklch(0.55 0.19 262 / 0.22), transparent 70%);
+  background-size: 48px 48px, 48px 48px, auto;
+  pointer-events: none;
+}
+
+.landing .lp-cta h2 {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--lp-text);
+  margin-bottom: 0.85rem;
+  text-wrap: balance;
+}
+
+.landing .lp-cta p {
+  max-width: 34rem;
+  margin: 0 auto 1.85rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--lp-dim);
+}
+
+.landing .lp-cta .lp-actions {
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 64rem) {
+  .landing .lp-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+    padding-top: 4rem;
+  }
+
+  .landing .lp-sub,
+  .landing .lp-hero-note {
+    max-width: none;
+  }
+
+  .landing .lp-ideas,
+  .landing .lp-model {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .landing .lp-split,
+  .landing .lp-mix {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing .lp-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .landing .lp-tabs label:nth-child(2) {
+    border-right: 0;
+  }
+
+  .landing .lp-tabs label:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--lp-line);
+  }
+}
+
+@media (max-width: 44rem) {
+  .landing {
+    padding: 0 1.1rem 4rem;
+  }
+
+  .landing .lp-section {
+    padding-top: 5rem;
+  }
+
+  .landing .lp-title {
+    font-size: clamp(2rem, 8.4vw, 2.75rem);
+  }
+
+  .landing .lp-ideas,
+  .landing .lp-model,
+  .landing .lp-scopes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing .lp-tabs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Stacked scopes: the elbows no longer describe the layout, keep the drop */
+  .landing .lp-join {
+    height: 1.75rem;
+  }
+
+  .landing .lp-join i {
+    display: none;
+  }
+
+  .landing .lp-join::after {
+    top: 0;
+  }
+
+  .landing .lp-mix-steps li {
+    grid-template-columns: 3.4rem minmax(0, 1fr);
+    row-gap: 0.3rem;
+  }
+
+  .landing .lp-mix-detail {
+    grid-column: 2;
+  }
+
+  .landing .lp-tabs label {
+    border-right: 0;
+    border-bottom: 1px solid var(--lp-line);
+  }
+
+  .landing .lp-loop li:not(:last-child)::after {
+    content: none;
+  }
+
+  .landing .lp-cta {
+    margin-top: 5rem;
+    padding: 3rem 1.25rem;
+  }
+}
+
+@media (max-width: 30rem) {
+  .landing .lp-filetag {
+    display: none;
+  }
+
+  .landing .lp-actions,
+  .landing .lp-btn {
+    width: 100%;
+  }
+
+  .landing .lp-btn {
+    justify-content: center;
+  }
+
+  .landing .lp-install {
+    width: 100%;
+  }
+}

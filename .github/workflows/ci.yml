@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: build & test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install workspaces
+        run: npm ci
+
+      # Build before test: test workflows import "steerium" through the
+      # workspace symlink, which resolves to the built dist/. The CLI tests
+      # additionally spawn dist/cli/index.js, the file the `steerium` bin runs.
+      - name: Build package
+        run: npm run build
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # Coverage runs once rather than per-matrix-entry: the thresholds are a
+      # property of the suite, not of the Node version.
+      - name: Test with coverage thresholds
+        if: matrix.node == 22
+        run: npm run test:coverage
+
+      - name: Build browser UI (includes UI typecheck)
+        run: npm run build:ui
+
+  docs:
+    name: docs build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install workspaces
+        run: npm ci
+
+      - name: Build docs site
+        run: npm run docs:build

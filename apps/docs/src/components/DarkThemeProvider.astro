@@ -1,0 +1,18 @@
+{/* Keep the docs in a single dark theme and avoid a flash of light UI. */}
+<script is:inline>
+  (() => {
+    const theme = 'dark';
+
+    document.documentElement.dataset.theme = theme;
+
+    try {
+      localStorage.setItem('starlight-theme', theme);
+    } catch {
+      // Storage can be unavailable in privacy-restricted browsing contexts.
+    }
+
+    window.StarlightThemeProvider = {
+      updatePickers() {},
+    };
+  })();
+</script>

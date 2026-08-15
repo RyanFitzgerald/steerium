@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+# astro build/cache output
+.astro/
+# local editor / agent tooling config
+.claude/
+.vscode/
+.idea/
+# local steerium home if created inside the repo
+.steerium/state.db
+.steerium/state.db-*
+.steerium/artifacts/
+.steerium/logs/

@@ -1,0 +1,29 @@
+{
+  "name": "steerium-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*",
+    "ui",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "npm run build -w steerium",
+    "build:ui": "npm run build -w steerium-ui",
+    "test": "npm run test -w steerium && npm run test -w steerium-ui",
+    "typecheck": "npm run typecheck -w steerium && npm run typecheck -w steerium-ui",
+    "steerium": "npm run steerium -w steerium --",
+    "ui:dev": "npm run dev -w steerium-ui",
+    "docs:dev": "npm run dev -w steerium-docs",
+    "docs:build": "npm run build -w steerium-docs",
+    "test:coverage": "npm run test:coverage -w steerium",
+    "lint": "biome lint packages/steerium/src packages/steerium/test ui/src ui/test",
+    "lint:fix": "biome lint --write packages/steerium/src packages/steerium/test ui/src ui/test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.5"
+  }
+}

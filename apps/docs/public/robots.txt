@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://steerium.dev/sitemap-index.xml
